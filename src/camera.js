@@ -54,6 +54,10 @@ export class Camera {
         newPosition[1] = this.position[1];
         newPosition[2] = this.position[2] - step;
 
+        // Don't let them zoom past the object in question.
+        if (newPosition[2] <= 0)
+            return;
+
         this.setPosition(newPosition);
     }
 
