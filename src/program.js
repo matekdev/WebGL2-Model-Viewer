@@ -1,3 +1,6 @@
+/**
+ * Abstraction that loads the vertex and fragment shader.
+ */
 export class Program {
 
     constructor(gl, vertexShaderId, fragmentShaderId) {

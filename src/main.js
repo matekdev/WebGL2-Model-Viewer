@@ -1,65 +1,121 @@
 import * as mat4 from '/libs/glMatrix/mat4.js';
-import { autoResizeCanvas, getGLContext, loadModel } from './utils.js';
+import { autoResizeCanvas, getGLContext } from './utils.js';
 import { Program } from './program.js';
+import { Clock } from './clock.js';
+import { Floor } from './floor.js';
+import { Camera } from './camera.js';
+import { Controls } from './controls.js';
+import { Scene } from './scene.js';
 
-const canvas = document.getElementById('webgl-canvas');
-autoResizeCanvas(canvas);
+let
+    gl, scene, program, camera, clock,
+    modelViewMatrix = mat4.create(),
+    projectionMatrix = mat4.create(),
+    normalMatrix = mat4.create();
 
-// Init program
-const gl = getGLContext(canvas);
-gl.clearColor(0.2, 0.2, 0.2, 1);
-gl.clearDepth(1);
-gl.enable(gl.DEPTH_TEST);
-gl.depthFunc(gl.LEQUAL);
+main();
 
-gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
-gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+function init() {
+    const canvas = document.getElementById('webgl-canvas');
+    autoResizeCanvas(canvas);
 
-const program = new Program(gl, 'vertex-shader', 'fragment-shader');
-program.load(['aVertexPosition'], ['uModelViewMatrix', 'uProjectionMatrix']);
+    gl = getGLContext(canvas);
+    gl.clearColor(0.9, 0.9, 0.9, 1);
+    gl.clearDepth(1);
+    gl.enable(gl.DEPTH_TEST);
+    gl.depthFunc(gl.LEQUAL);
 
-// Init buffers (temp)
-var modelData = loadModel("/models/ball.json");
-const vertices = modelData.vertices;
-const indices = modelData.indices;
+    clock = new Clock();
 
-const VAO = gl.createVertexArray();
-gl.bindVertexArray(VAO);
+    program = new Program(gl, 'vertex-shader', 'fragment-shader');
 
-// Vertex buffer
-const vertexBuffer = gl.createBuffer();
-gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer);
-gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
-gl.vertexAttribPointer(program.aVertexPosition, 3, gl.FLOAT, false, 0, 0);
-gl.enableVertexAttribArray(program.aVertexPosition);
+    const uniforms = [
+        'uProjectionMatrix',
+        'uModelViewMatrix',
+        'uNormalMatrix',
+        'uMaterialDiffuse',
+        'uLightAmbient',
+        'uLightDiffuse',
+        'uLightPosition',
+        'uWireframe'
+    ];
 
-// Index buffer
-const indexBuffer = gl.createBuffer();
-gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuffer);
-gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(indices), gl.STATIC_DRAW);
+    const attributes = [
+        'aVertexPosition',
+        'aVertexNormal',
+        'aVertexColor'
+    ];
 
-gl.bindVertexArray(null);
+    program.load(attributes, uniforms);
 
-const projectionMatrix = mat4.create();
-const modelViewMatrix = mat4.create();
+    scene = new Scene(gl, program);
 
-draw();
+    camera = new Camera(Camera.TRACKING_TYPE);
+    camera.reset([0, 2, 50]);
+
+    new Controls(camera, canvas);
+
+    gl.uniform3fv(program.uLightPosition, [0, 120, 120]);
+    gl.uniform4fv(program.uLightAmbient, [0.20, 0.20, 0.20, 1]);
+    gl.uniform4fv(program.uLightDiffuse, [1, 1, 1, 1]);
+
+    modelViewMatrix = camera.getViewTransform();
+    mat4.identity(projectionMatrix);
+    updateTransforms();
+    mat4.identity(normalMatrix);
+    mat4.copy(normalMatrix, modelViewMatrix);
+    mat4.invert(normalMatrix, normalMatrix);
+    mat4.transpose(normalMatrix, normalMatrix);
+}
+
+function updateTransforms() {
+    mat4.perspective(projectionMatrix, 45 * (Math.PI / 180), gl.canvas.width / gl.canvas.height, 0.1, 1000);
+}
+
+function setMatrixUniforms() {
+    gl.uniformMatrix4fv(program.uModelViewMatrix, false, camera.getViewTransform());
+    gl.uniformMatrix4fv(program.uProjectionMatrix, false, projectionMatrix);
+    mat4.transpose(normalMatrix, camera.matrix);
+    gl.uniformMatrix4fv(program.uNormalMatrix, false, normalMatrix);
+}
+
+function loadModels() {
+    scene.add(new Floor(80, 2));
+    scene.load('/models/ball.json', 'ball');
+}
 
 function draw() {
-    requestAnimationFrame(draw);
-    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
     gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
+    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-    mat4.perspective(projectionMatrix, 45 * (Math.PI / 180), gl.canvas.width / gl.canvas.height, 10, 10000);
-    mat4.identity(modelViewMatrix);
-    mat4.translate(modelViewMatrix, modelViewMatrix, [0, 0, -10]);
-    mat4.rotate(modelViewMatrix, modelViewMatrix, 30 * Math.PI / 180, [1, 0, 0]);
-    mat4.rotate(modelViewMatrix, modelViewMatrix, 30 * Math.PI / 180, [0, 1, 0]);
+    try {
+        updateTransforms();
+        setMatrixUniforms();
 
-    gl.uniformMatrix4fv(program.uProjectionMatrix, false, projectionMatrix);
-    gl.uniformMatrix4fv(program.uModelViewMatrix, false, modelViewMatrix);
+        scene.traverse(object => {
+            gl.uniform4fv(program.uMaterialDiffuse, object.diffuse);
+            gl.uniform1i(program.uWireframe, object.wireframe);
 
-    gl.bindVertexArray(VAO);
-    gl.drawElements(gl.TRIANGLES, indices.length, gl.UNSIGNED_SHORT, 0);
-    gl.bindVertexArray(null);
+            gl.bindVertexArray(object.vao);
+            gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, object.ibo);
+
+            if (object.wireframe)
+                gl.drawElements(gl.LINES, object.indices.length, gl.UNSIGNED_SHORT, 0);
+            else
+                gl.drawElements(gl.TRIANGLES, object.indices.length, gl.UNSIGNED_SHORT, 0);
+
+            gl.bindVertexArray(null);
+            gl.bindBuffer(gl.ARRAY_BUFFER, null);
+            gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
+        });
+    }
+    catch (error) {
+        console.error(error);
+    }
+}
+
+function main() {
+    init();
+    loadModels();
+    clock.on('tick', draw);
 }
