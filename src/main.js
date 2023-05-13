@@ -5,7 +5,7 @@ AutoResizeCanvas(canvas);
 
 const gl = GetGLContext(canvas);
 gl.clearColor(0.2, 0.2, 0.2, 1);
-gl.clearDepth(100);
+gl.clearDepth(1);
 gl.enable(gl.DEPTH_TEST);
 gl.depthFunc(gl.LEQUAL);
 
