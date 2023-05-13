@@ -18,6 +18,7 @@ export class Camera {
 
         this.matrix = mat4.create();
 
+        this.pos = [0, 2, 50];
         this.azimuth = 0;
         this.elevation = 0;
         this.fov = 45;
@@ -27,13 +28,8 @@ export class Camera {
 
     /**
      * Reset the camera to the given position. Sets the azimuth and elevation to be zero.
-     * @param pos The position to reset to.
      */
-    reset(pos) {
-        if (pos) {
-            this.pos = pos;
-        }
-
+    reset() {
         this.setPosition(this.pos);
         this.setAzimuth(0);
         this.setElevation(0);

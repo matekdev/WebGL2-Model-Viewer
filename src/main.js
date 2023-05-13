@@ -51,7 +51,7 @@ function init() {
     scene = new Scene(gl, program);
 
     camera = new Camera(Camera.TRACKING_TYPE);
-    camera.reset([0, 2, 50]);
+    camera.reset();
 
     new Controls(camera, canvas);
 
@@ -77,6 +77,13 @@ function setMatrixUniforms() {
     gl.uniformMatrix4fv(program.uProjectionMatrix, false, projectionMatrix);
     mat4.transpose(normalMatrix, camera.matrix);
     gl.uniformMatrix4fv(program.uNormalMatrix, false, normalMatrix);
+}
+
+function initUI() {
+    const pane = new Tweakpane.Pane();
+
+    const resetButton = pane.addButton({ title: 'Reset Camera' });
+    resetButton.on('click', () => { camera.reset(); });
 }
 
 function loadModels() {
@@ -116,6 +123,7 @@ function draw() {
 
 function main() {
     init();
+    initUI();
     loadModels();
     clock.on('tick', draw);
 }
