@@ -18,7 +18,6 @@ export class Camera {
 
         this.matrix = mat4.create();
 
-        this.steps = 0;
         this.azimuth = 0;
         this.elevation = 0;
         this.fov = 45;
@@ -49,13 +48,12 @@ export class Camera {
         const newPosition = vec3.create();
         vec3.normalize(normal, this.normal);
 
-        const step = stepIncrement - this.steps;
+        const step = stepIncrement;
 
         newPosition[0] = this.position[0];
         newPosition[1] = this.position[1];
         newPosition[2] = this.position[2] - step;
 
-        this.steps = step;
         this.setPosition(newPosition);
     }
 

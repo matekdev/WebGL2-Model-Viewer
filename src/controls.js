@@ -106,7 +106,8 @@ export class Controls {
     }
 
     onMouseWheel(event) {
-        this.camera.zoom(-event.deltaY * 0.1);
+        const step = event.deltaY < 0 ? 5 : -5;
+        this.camera.zoom(step);
     }
 
     onKeyDown(event) {
