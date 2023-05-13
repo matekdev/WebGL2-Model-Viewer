@@ -1,4 +1,4 @@
-import * as mat4 from './libs/glMatrix/mat4.js';
+import * as mat4 from '/libs/glMatrix/mat4.js';
 import { autoResizeCanvas, getGLContext, loadModel } from './utils.js';
 import { Program } from './program.js';
 
@@ -19,7 +19,7 @@ const program = new Program(gl, 'vertex-shader', 'fragment-shader');
 program.load(['aVertexPosition'], ['uModelViewMatrix', 'uProjectionMatrix']);
 
 // Init buffers (temp)
-var modelData = loadModel("/models/ball");
+var modelData = loadModel("/models/ball.json");
 const vertices = modelData.vertices;
 const indices = modelData.indices;
 
