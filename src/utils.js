@@ -4,7 +4,7 @@
  * @param canvas The canvas to fetch the GL context from.
  * @returns an instance of the GL context WebGL2RenderingContext.
  */
-export function GetGLContext(canvas) {
+export function getGLContext(canvas) {
     return canvas.getContext('webgl2') || console.error('WebGL2 is not available in your browser.');
 }
 
@@ -13,11 +13,22 @@ export function GetGLContext(canvas) {
  * of the current window.
  * @param canvas The canvas to resize.
  */
-export function AutoResizeCanvas(canvas) {
+export function autoResizeCanvas(canvas) {
     const expandFullScreen = () => {
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
     };
     expandFullScreen();
     window.addEventListener('resize', expandFullScreen);
+}
+
+export function loadModel(path) {
+    const request = new XMLHttpRequest();
+    request.open('GET', path, false);
+    request.send(null);
+    if (request.status !== 200)
+        return
+
+    const data = JSON.parse(request.responseText);
+    return data;
 }

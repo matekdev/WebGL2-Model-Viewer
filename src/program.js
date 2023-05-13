@@ -16,32 +16,32 @@ export class Program {
             return console.error('Could not initialize shaders.');
         }
 
-        this.UseProgram();
+        this.useProgram();
     }
 
-    UseProgram() {
+    useProgram() {
         this.gl.useProgram(this.program);
     }
 
-    Load(attributes, uniforms) {
-        this.UseProgram();
-        this.SetAttributeLocations(attributes);
-        this.SetUniformLocations(uniforms);
+    load(attributes, uniforms) {
+        this.useProgram();
+        this.setAttributeLocations(attributes);
+        this.setUniformLocations(uniforms);
     }
 
-    SetAttributeLocations(attributes) {
+    setAttributeLocations(attributes) {
         attributes.forEach(attribute => {
             this[attribute] = this.gl.getAttribLocation(this.program, attribute);
         });
     }
 
-    SetUniformLocations(uniforms) {
+    setUniformLocations(uniforms) {
         uniforms.forEach(uniform => {
             this[uniform] = this.gl.getUniformLocation(this.program, uniform);
         });
     }
 
-    GetUniform(uniformLocation) {
+    getUniform(uniformLocation) {
         return this.gl.getUniform(this.program, uniformLocation);
     }
 
