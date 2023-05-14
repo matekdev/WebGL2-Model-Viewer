@@ -9,6 +9,7 @@ import { Scene } from './scene.js';
 
 let
     gl, scene, program, camera, clock,
+    currentModel = '/models/teapot.obj',
     lightPosition = [0, 100, 100],
     backgroundColor = [0.8, 0.8, 0.8, 1],
     modelViewMatrix = mat4.create(),
@@ -83,6 +84,23 @@ function setMatrixUniforms() {
 
 function initUI() {
     const pane = new Tweakpane.Pane();
+
+    // Model
+    const model = pane.addBlade({
+        view: 'list',
+        label: 'model',
+        options: [
+            { text: 'teapot', value: '/models/teapot.obj' },
+            { text: 'cube', value: '/models/cube.obj' },
+            { text: 'bunny', value: '/models/bunny.obj' },
+        ],
+        value: '/models/teapot.obj',
+    });
+    model.on('change', function (ev) {
+        scene.remove(currentModel);
+        currentModel = ev.value;
+        scene.load(currentModel, 'model');
+    });
 
     // Wireframe
     const wireframe = pane.addInput({ wireframe: scene.get('model').wireframe, }, 'wireframe');
