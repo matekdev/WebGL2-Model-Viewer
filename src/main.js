@@ -9,6 +9,7 @@ import { Scene } from './scene.js';
 
 let
     gl, scene, program, camera, clock,
+    backgroundColor = [0.8, 0.8, 0.8, 1],
     modelViewMatrix = mat4.create(),
     projectionMatrix = mat4.create(),
     normalMatrix = mat4.create();
@@ -20,7 +21,7 @@ function init() {
     autoResizeCanvas(canvas);
 
     gl = getGLContext(canvas);
-    gl.clearColor(0.9, 0.9, 0.9, 1);
+    gl.clearColor(backgroundColor[0], backgroundColor[1], backgroundColor[2], backgroundColor[3]);
     gl.clearDepth(1);
     gl.enable(gl.DEPTH_TEST);
     gl.depthFunc(gl.LEQUAL);
@@ -96,6 +97,10 @@ function initUI() {
     const color = pane.addInput({ color: { r: scene.get('model').diffuse[0], g: scene.get('model').diffuse[1], b: scene.get('model').diffuse[2] } }, 'color', { color: { type: 'float' } });
     color.on('change', function (ev) { scene.get('model').diffuse = [ev.value.r, ev.value.g, ev.value.b, 1.0]; });
 
+    // Background Color
+    const bgColor = pane.addInput({ bgColor: { r: backgroundColor[0], g: backgroundColor[1], b: backgroundColor[2] } }, 'bgColor', { color: { type: 'float' } });
+    bgColor.on('change', function (ev) { backgroundColor = [ev.value.r, ev.value.g, ev.value.b, 1.0]; });
+
     // Wireframe
     const wireframe = pane.addInput({ wireframe: scene.get('model').wireframe, }, 'wireframe');
     wireframe.on('change', function (ev) { scene.get('model').wireframe = ev.value });
@@ -108,6 +113,7 @@ function loadModels() {
 
 function draw() {
     gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
+    gl.clearColor(backgroundColor[0], backgroundColor[1], backgroundColor[2], backgroundColor[3]);
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
     try {
