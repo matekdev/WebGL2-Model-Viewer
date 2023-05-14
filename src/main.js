@@ -89,21 +89,20 @@ function initUI() {
     const y = offset.addInput({ y: camera.position[1] }, 'y', { min: -100, max: 100, step: 1 });
     y.on('change', function (ev) { camera.setPosition([camera.position[0], ev.value, camera.position[2]]); });
 
-    // Color
+    const resetButton = offset.addButton({ title: 'Reset Camera' });
+    resetButton.on('click', () => { camera.reset(); pane.dispose(); initUI(); });
+
+    // Model Color
     const color = pane.addInput({ color: { r: scene.get('model').diffuse[0], g: scene.get('model').diffuse[1], b: scene.get('model').diffuse[2] } }, 'color', { color: { type: 'float' } });
     color.on('change', function (ev) { scene.get('model').diffuse = [ev.value.r, ev.value.g, ev.value.b, 1.0]; });
 
-    // Reset
-    const resetButton = pane.addButton({ title: 'Reset' });
-    resetButton.on('click', () => {
-        camera.reset();
-        pane.dispose();
-        initUI();
-    });
+    // Wireframe
+    const wireframe = pane.addInput({ wireframe: scene.get('model').wireframe, }, 'wireframe');
+    wireframe.on('change', function (ev) { scene.get('model').wireframe = ev.value });
 }
 
 function loadModels() {
-    scene.add(new Floor(80, 2));
+    scene.add(new Floor(80, 2), 'floor');
     scene.load('/models/teapot.obj', 'model');
 }
 
@@ -122,7 +121,7 @@ function draw() {
             gl.bindVertexArray(object.vao);
             gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, object.ibo);
 
-            if (object.wireframe)
+            if (object.wireframe || object.alias == 'floor')
                 gl.drawElements(gl.LINES, object.indices.length, gl.UNSIGNED_SHORT, 0);
             else
                 gl.drawElements(gl.TRIANGLES, object.indices.length, gl.UNSIGNED_SHORT, 0);

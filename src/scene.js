@@ -46,6 +46,8 @@ export class Scene {
 
         object.illum = object.illum || 1;
 
+        object.wireframe = false;
+
         Object.assign(object, attributes);
 
         object.ibo = gl.createBuffer();
