@@ -1,40 +1,10 @@
-class EventEmitter {
-
-    constructor() {
-        this.events = {};
-    }
-
-    on(event, callback) {
-        if (!this.events[event]) {
-            this.events[event] = [];
-        }
-        this.events[event].push(callback);
-    }
-
-    remove(event, listener) {
-        if (this.events[event]) {
-            const index = this.events[event].indexOf(listener);
-            if (~index) {
-                this.events[event].splice(index, 1);
-            }
-        }
-    }
-
-    emit(event) {
-        const events = this.events[event];
-        if (events) {
-            events.forEach((event) => event());
-        }
-    }
-}
-
 /**
  * Clock class to handle a simple game loop.
  */
-export class Clock extends EventEmitter {
+export class Clock {
 
     constructor() {
-        super();
+        this.events = {};
         this.isRunning = true;
 
         this.tick = this.tick.bind(this);
@@ -62,5 +32,17 @@ export class Clock extends EventEmitter {
 
     stop() {
         this.isRunning = false;
+    }
+
+    on(event, callback) {
+        if (!this.events[event])
+            this.events[event] = [];
+        this.events[event].push(callback);
+    }
+
+    emit(event) {
+        const events = this.events[event];
+        if (events)
+            events.forEach((event) => event());
     }
 }

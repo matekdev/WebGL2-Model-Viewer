@@ -6,11 +6,8 @@ export class Controls {
     constructor(camera, canvas) {
         this.camera = camera;
         this.canvas = canvas;
-        this.picker = null;
 
         this.dragging = false;
-        this.picking = false;
-        this.ctrl = false;
 
         this.x = 0;
         this.y = 0;
@@ -29,7 +26,6 @@ export class Controls {
         canvas.onmousemove = event => this.onMouseMove(event);
         canvas.onmousewheel = event => this.onMouseWheel(event);
         window.onkeydown = event => this.onKeyDown(event);
-        window.onkeyup = event => this.onKeyUp(event);
     }
 
     get2DCoords(event) {
@@ -54,11 +50,6 @@ export class Controls {
 
     onMouseUp(event) {
         this.dragging = false;
-
-        if (!event.shiftKey && this.picker) {
-            this.picking = false;
-            this.picker.stop();
-        }
     }
 
     onMouseDown(event) {
@@ -69,13 +60,6 @@ export class Controls {
         this.button = event.button;
 
         this.dstep = Math.max(this.camera.position[0], this.camera.position[1], this.camera.position[2]) / 100;
-
-        if (!this.picker) return;
-
-        const coordinates = this.get2DCoords(event);
-        this.picking = this.picker.find(coordinates);
-
-        if (!this.picking) this.picker.stop();
     }
 
     onMouseMove(event) {
@@ -85,24 +69,13 @@ export class Controls {
         this.x = event.clientX;
         this.y = event.clientY;
 
-        if (!this.dragging) return;
-
-        this.ctrl = event.ctrlKey;
-        this.alt = event.altKey;
+        if (!this.dragging)
+            return;
 
         const dx = this.x - this.lastX;
         const dy = this.y - this.lastY;
 
-        if (this.picking && this.picker.moveCallback) {
-            this.picker.moveCallback(dx, dy);
-            return;
-        }
-
-        if (!this.button) {
-            this.alt
-                ? this.zoom(dy)
-                : this.rotate(dx, dy);
-        }
+        this.rotate(dx, dy);
     }
 
     onMouseWheel(event) {
@@ -112,9 +85,6 @@ export class Controls {
 
     onKeyDown(event) {
         this.key = event.keyCode;
-        this.ctrl = event.ctrlKey;
-
-        if (this.ctrl) return;
 
         switch (this.key) {
             case 37:
@@ -125,12 +95,6 @@ export class Controls {
                 return this.camera.changeAzimuth(this.keyIncrement);
             case 40:
                 return this.camera.changeElevation(-this.keyIncrement);
-        }
-    }
-
-    onKeyUp(event) {
-        if (event.keyCode === 17) {
-            this.ctrl = false;
         }
     }
 

@@ -96,8 +96,10 @@ function initUI() {
         value: '/models/teapot.obj',
     });
     model.on('change', (ev) => {
+        const activeColor = scene.get('model').diffuse;
+        const activeWireframe = scene.get('model').wireframe;
         scene.remove(scene.get('model'));
-        scene.load(ev.value, 'model', { wireframe: wireframe.controller_.binding.value.rawValue_ });
+        scene.load(ev.value, 'model', { wireframe: activeWireframe, diffuse: activeColor });
     });
 
     // Wireframe
