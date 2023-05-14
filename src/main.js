@@ -9,6 +9,7 @@ import { Scene } from './scene.js';
 
 let
     gl, scene, program, camera, clock,
+    lightPosition = [0, 100, 100],
     backgroundColor = [0.8, 0.8, 0.8, 1],
     modelViewMatrix = mat4.create(),
     projectionMatrix = mat4.create(),
@@ -56,7 +57,7 @@ function init() {
 
     new Controls(camera, canvas);
 
-    gl.uniform3fv(program.uLightPosition, [0, 120, 120]);
+    gl.uniform3fv(program.uLightPosition, lightPosition);
     gl.uniform4fv(program.uLightAmbient, [0.20, 0.20, 0.20, 1]);
     gl.uniform4fv(program.uLightDiffuse, [1, 1, 1, 1]);
 
@@ -83,6 +84,18 @@ function setMatrixUniforms() {
 function initUI() {
     const pane = new Tweakpane.Pane();
 
+    // Wireframe
+    const wireframe = pane.addInput({ wireframe: scene.get('model').wireframe, }, 'wireframe');
+    wireframe.on('change', function (ev) { scene.get('model').wireframe = ev.value });
+
+    // Model Color
+    const color = pane.addInput({ color: { r: scene.get('model').diffuse[0], g: scene.get('model').diffuse[1], b: scene.get('model').diffuse[2] } }, 'color', { color: { type: 'float' } });
+    color.on('change', function (ev) { scene.get('model').diffuse = [ev.value.r, ev.value.g, ev.value.b, 1.0]; });
+
+    // Background Color
+    const bgColor = pane.addInput({ bgColor: { r: backgroundColor[0], g: backgroundColor[1], b: backgroundColor[2] } }, 'bgColor', { color: { type: 'float' } });
+    bgColor.on('change', function (ev) { backgroundColor = [ev.value.r, ev.value.g, ev.value.b, 1.0]; });
+
     // Camera offsets
     const offset = pane.addFolder({ title: 'Offset', expanded: true, });
     const x = offset.addInput({ x: camera.position[0] }, 'x', { min: -100, max: 100, step: 1 });
@@ -93,17 +106,14 @@ function initUI() {
     const resetButton = offset.addButton({ title: 'Reset Camera' });
     resetButton.on('click', () => { camera.reset(); pane.dispose(); initUI(); });
 
-    // Model Color
-    const color = pane.addInput({ color: { r: scene.get('model').diffuse[0], g: scene.get('model').diffuse[1], b: scene.get('model').diffuse[2] } }, 'color', { color: { type: 'float' } });
-    color.on('change', function (ev) { scene.get('model').diffuse = [ev.value.r, ev.value.g, ev.value.b, 1.0]; });
-
-    // Background Color
-    const bgColor = pane.addInput({ bgColor: { r: backgroundColor[0], g: backgroundColor[1], b: backgroundColor[2] } }, 'bgColor', { color: { type: 'float' } });
-    bgColor.on('change', function (ev) { backgroundColor = [ev.value.r, ev.value.g, ev.value.b, 1.0]; });
-
-    // Wireframe
-    const wireframe = pane.addInput({ wireframe: scene.get('model').wireframe, }, 'wireframe');
-    wireframe.on('change', function (ev) { scene.get('model').wireframe = ev.value });
+    // Lighting
+    const lighting = pane.addFolder({ title: 'Lighting', expanded: true, });
+    const lightingX = lighting.addInput({ x: lightPosition[0] }, 'x', { min: -100, max: 100, step: 1 });
+    lightingX.on('change', function (ev) { lightPosition[0] = ev.value; });
+    const lightingY = lighting.addInput({ y: lightPosition[1] }, 'y', { min: -100, max: 100, step: 1 });
+    lightingY.on('change', function (ev) { lightPosition[1] = ev.value; });
+    const lightingZ = lighting.addInput({ z: lightPosition[1] }, 'z', { min: -100, max: 100, step: 1 });
+    lightingZ.on('change', function (ev) { lightPosition[2] = ev.value; });
 }
 
 function loadModels() {
@@ -115,6 +125,8 @@ function draw() {
     gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
     gl.clearColor(backgroundColor[0], backgroundColor[1], backgroundColor[2], backgroundColor[3]);
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
+    gl.uniform3fv(program.uLightPosition, lightPosition);
 
     try {
         updateTransforms();
