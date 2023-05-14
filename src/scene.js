@@ -14,12 +14,16 @@ export class Scene {
     }
 
     load(filename, alias, attributes) {
-        return fetch(filename).then(res => res.text()).then(data => {
-            var mesh = new OBJ.Mesh(data);
-            mesh.visible = true;
-            mesh.alias = alias || mesh.alias;
-            this.add(mesh, attributes);
-        }).catch((err) => console.error(err, ...arguments));
+        const request = new XMLHttpRequest();
+        request.open('GET', filename, false);
+        request.send(null);
+        if (request.status !== 200)
+            return
+
+        var mesh = new OBJ.Mesh(request.responseText);
+        mesh.visible = true;
+        mesh.alias = alias || mesh.alias;
+        this.add(mesh, attributes);
     }
 
     add(object, attributes) {
