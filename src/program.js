@@ -1,5 +1,5 @@
 /**
- * Abstraction that loads the vertex and fragment shader.
+ * Abstraction that loads the vertex and fragment shader to create a program.
  */
 export class Program {
 

@@ -96,12 +96,6 @@ export class Scene {
         gl.bindBuffer(gl.ARRAY_BUFFER, null);
     }
 
-    traverse(cb) {
-        for (let i = 0; i < this.objects.length; i++) {
-            if (cb(this.objects[i], i) !== undefined) break;
-        }
-    }
-
     remove(alias) {
         const object = this.get(alias);
         const index = this.objects.indexOf(object);
