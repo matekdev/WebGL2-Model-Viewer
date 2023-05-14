@@ -100,7 +100,7 @@ function initUI() {
 
 function loadModels() {
     scene.add(new Floor(80, 2));
-    scene.load('/models/ball.json', 'ball');
+    scene.load('/models/teapot.obj', 'ball');
 }
 
 function draw() {

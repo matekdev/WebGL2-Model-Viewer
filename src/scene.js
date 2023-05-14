@@ -14,23 +14,17 @@ export class Scene {
     }
 
     load(filename, alias, attributes) {
-        return fetch(filename)
-            .then(res => res.json())
-            .then(object => {
-                object.visible = true;
-                object.alias = alias || object.alias;
-                this.add(object, attributes);
-            })
-            .catch((err) => console.error(err, ...arguments));
+        return fetch(filename).then(res => res.text()).then(data => {
+            var mesh = new OBJ.Mesh(data);
+            mesh.visible = true;
+            mesh.alias = alias || mesh.alias;
+            this.add(mesh, attributes);
+        }).catch((err) => console.error(err, ...arguments));
     }
 
     add(object, attributes) {
         const { gl, program } = this;
 
-        // Since we've used both the OBJ convention here (e.g. Ka, Kd, Ks, etc.)
-        // and descriptive terms throughout the book for educational purposes, we will set defaults for
-        // each that doesn't exist to ensure the entire series of demos work.
-        // That being said, it's best to stick to one convention throughout your application.
         object.diffuse = object.diffuse || [1, 1, 1, 1];
         object.Kd = object.Kd || object.diffuse.slice(0, 3);
 
