@@ -1,3 +1,3 @@
 # WebGL2 Model Viewer
 
-![teapot](imgs/teapot.jpeg "teapot")
+![teapot](imgs/preview1.jpeg "teapot")
