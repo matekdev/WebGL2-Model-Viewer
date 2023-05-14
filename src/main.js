@@ -82,8 +82,20 @@ function setMatrixUniforms() {
 function initUI() {
     const pane = new Tweakpane.Pane();
 
-    const resetButton = pane.addButton({ title: 'Reset Camera' });
-    resetButton.on('click', () => { camera.reset(); });
+    // Camera offsets
+    const offset = pane.addFolder({ title: 'Offset', expanded: true, });
+    const x = offset.addInput({ x: camera.position[0] }, 'x', { min: -100, max: 100, step: 1 });
+    x.on('change', function (ev) { camera.setPosition([ev.value, camera.position[1], camera.position[2]]); });
+    const y = offset.addInput({ y: camera.position[1] }, 'y', { min: -100, max: 100, step: 1 });
+    y.on('change', function (ev) { camera.setPosition([camera.position[0], ev.value, camera.position[2]]); });
+
+    // Reset
+    const resetButton = pane.addButton({ title: 'Reset' });
+    resetButton.on('click', () => {
+        camera.reset();
+        pane.dispose();
+        initUI();
+    });
 }
 
 function loadModels() {

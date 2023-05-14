@@ -18,7 +18,7 @@ export class Camera {
 
         this.matrix = mat4.create();
 
-        this.pos = [0, 2, 50];
+        this.pos = [0, 0, 50];
         this.azimuth = 0;
         this.elevation = 0;
         this.fov = 45;
